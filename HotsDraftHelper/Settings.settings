@@ -1,0 +1,24 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="HotsDraftHelper" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="MinSampleSize" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1000</Value>
+    </Setting>
+    <Setting Name="HotsLogsExportPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%USERPROFILE%\Documents\HOTSLogsExport</Value>
+    </Setting>
+    <Setting Name="BaseWinrateGameMode" Type="System.String" Scope="User">
+      <Value Profile="(Default)">TeamLeague</Value>
+    </Setting>
+    <Setting Name="BaseWinrateNumberOfDays" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">7</Value>
+    </Setting>
+    <Setting Name="AdjustmentsGameMode" Type="System.String" Scope="User">
+      <Value Profile="(Default)">QuickMatch</Value>
+    </Setting>
+    <Setting Name="AdjustmentsNumberOfDays" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-1</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

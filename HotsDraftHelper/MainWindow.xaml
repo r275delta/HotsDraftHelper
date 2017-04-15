@@ -1,0 +1,130 @@
+﻿<Window x:Class="HotsDraftHelper.MainWindow"
+        x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HotsDraftHelper"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        mc:Ignorable="d"
+        Title="HOTS Draft Helper" Height="350" Width="720"
+        IsEnabled="{Binding Ready}">
+    <Window.DataContext>
+        <local:MainViewModel />
+    </Window.DataContext>
+    <Window.Resources>
+        <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <CollectionViewSource Source="{Binding AvailableAllies}" 
+                              IsLiveSortingRequested="True" 
+                              x:Key="AvailableAlliesSource">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Diff" Direction="Descending" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <CollectionViewSource Source="{Binding AvailableEnemies}" 
+                              IsLiveSortingRequested="True" 
+                              x:Key="AvailableEnemiesSource">
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="Diff" Direction="Ascending" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Command="{Binding LoadCommand}" Margin="4">Load</Button>
+            <Button Grid.Column="1" Command="{Binding ResetCommand}" Margin="4">Reset</Button>
+            <TextBlock Grid.Column="2" VerticalAlignment="Center">Map:</TextBlock>
+            <ComboBox Grid.Column="3" MinWidth="200" ItemsSource="{Binding AvailableMaps}" SelectedItem="{Binding SelectedMap}" DisplayMemberPath="Name" Margin="4" />
+            <TextBlock Grid.Column="4" VerticalAlignment="Center" Text="{Binding LoadError}" Foreground="Red" FontWeight="Bold" />
+            <TextBlock Grid.Column="6" VerticalAlignment="Center" Margin="4" Visibility="{Binding TheoWinRate, Converter={StaticResource NullToVisibilityConverter}}" Text="{Binding TheoWinRate, StringFormat=Win Rate: {0:P}}" />
+        </Grid>
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" Foreground="Blue">Ally</TextBlock>
+                <TextBlock Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" HorizontalAlignment="Center" Foreground="Red">Enemy</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Center">Available</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center">Picked</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center">Banned</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="3" HorizontalAlignment="Center">Picked</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="4" HorizontalAlignment="Center">Available</TextBlock>
+                <DataGrid Grid.Row="2" Grid.Column="0" ItemsSource="{Binding Source={StaticResource AvailableAlliesSource}}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickAvailableAlly">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="Diff" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50" SortDirection="Descending" />
+                    </DataGrid.Columns>
+                    <DataGrid.ContextMenu>
+                        <ContextMenu DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Header="Ban" 
+                                      Command="{Binding DataContext.BanCommand}"
+                                      CommandParameter="{Binding SelectedItem.Hero}" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </DataGrid>
+                <DataGrid Grid.Row="2" Grid.Column="1" ItemsSource="{Binding PickedAllies}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickSelectedAlly">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="Adj" Binding="{Binding Diff, StringFormat={}{0:F3}}" IsReadOnly="True" Width="50" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <DataGrid Grid.Row="2" Grid.Column="2" ItemsSource="{Binding Bans}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Hero" Binding="{Binding Name}" IsReadOnly="True" />
+                    </DataGrid.Columns>
+                    <DataGrid.ContextMenu>
+                        <ContextMenu DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Header="Unban" 
+                                      Command="{Binding DataContext.UnbanCommand}"
+                                      CommandParameter="{Binding SelectedItem}" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </DataGrid>
+                <DataGrid Grid.Row="2" Grid.Column="3" ItemsSource="{Binding PickedEnemies}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickSelectedEnemy">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="Adj" Binding="{Binding Diff, StringFormat={}{0:F3}}" IsReadOnly="True" Width="50" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <DataGrid Grid.Row="2" Grid.Column="4" ItemsSource="{Binding Source={StaticResource AvailableEnemiesSource}}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickAvailableEnemy">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="Diff" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50" SortDirection="Ascending" />
+                    </DataGrid.Columns>
+                    <DataGrid.ContextMenu>
+                        <ContextMenu DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Header="Ban" 
+                                      Command="{Binding DataContext.BanCommand}"
+                                      CommandParameter="{Binding SelectedItem.Hero}" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </DataGrid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
