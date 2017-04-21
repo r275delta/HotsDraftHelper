@@ -1,6 +1,6 @@
-﻿namespace HotsDraftHelper.Data
+﻿namespace HotsDraftLib
 {
-    internal sealed class Map
+    public sealed class Map
     {
         public int Id { get; }
         public string Name { get; }

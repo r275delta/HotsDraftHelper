@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using MathNet.Numerics.Distributions;
 
-namespace HotsDraftHelper
+namespace HotsDraftLib
 {
-    internal static class Utils
+    public static class Utils
     {
         public static bool FastParse(string s, out int val)
         {
@@ -28,7 +28,7 @@ namespace HotsDraftHelper
                 val *= -1;
             return digits;
         }
-        
+
         public static bool FastParse(string s, out long val)
         {
             bool digits = false;
@@ -82,7 +82,7 @@ namespace HotsDraftHelper
         }
 
         private static readonly Normal _standardNormal = new Normal(0, 1);
-        
+
         public static double CalcAdjustment(double baseWinrate, double conditionalWinrate)
         {
             if (baseWinrate == conditionalWinrate || conditionalWinrate == 0)
@@ -90,12 +90,12 @@ namespace HotsDraftHelper
 
             return _standardNormal.InverseCumulativeDistribution(conditionalWinrate) - _standardNormal.InverseCumulativeDistribution(baseWinrate);
         }
-        
+
         public static double ApplyAdjustment(double baseWinrate, double adjustment)
         {
             if (adjustment == 0)
                 return baseWinrate;
-            
+
             return _standardNormal.CumulativeDistribution(_standardNormal.InverseCumulativeDistribution(baseWinrate) + adjustment);
         }
     }

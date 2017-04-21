@@ -1,4 +1,7 @@
-﻿using HotsDraftHelper.Data;
+﻿using HotsDraftLib;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace HotsDraftHelper
 {
@@ -24,7 +27,7 @@ namespace HotsDraftHelper
         public string Breakdown
         {
             get { return _breakdown; }
-            set
+            private set
             {
                 if (_breakdown == value)
                     return;
@@ -36,6 +39,26 @@ namespace HotsDraftHelper
         public HeroSelectionViewModel(Hero hero)
         {
             Hero = hero;
+        }
+
+        public void SetBreakdown(IReadOnlyList<(string source, double amount)> items)
+        {
+            if (items == null || items.Count == 0)
+            {
+                Breakdown = null;
+                return;
+            }
+            double itemsTotal = items.Sum(i => i.amount);
+            double scale = itemsTotal == 0 ? 0 : Diff / itemsTotal;
+            var sb = new StringBuilder();
+            sb.Append("Breakdown:");
+            foreach (var item in items)
+            {
+                sb.AppendLine();
+                sb.Append(item.source).Append(": ");
+                sb.Append((item.amount * scale).ToString("P"));
+            }
+            Breakdown = sb.ToString();
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace HotsDraftHelper.Data
+﻿namespace HotsDraftLib
 {
-    internal sealed class Hero
+    public sealed class Hero
     {
         public int Id { get; }
         public string Name { get; }

@@ -4,13 +4,14 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using HotsDraftHelper.Data;
+using HotsDraftLib;
+using System.Text;
 
 namespace HotsDraftHelper
 {
     internal sealed class MainViewModel : ViewModelBase
     {
-        private HeroesStatistics _heroesStatistics;
+        private StatisticsCollection _stats;
 
         private bool _ready = true;
         public bool Ready
@@ -248,7 +249,10 @@ namespace HotsDraftHelper
         private void DoLoad()
         {
             Ready = false;
-            Task.Factory.StartNew(() =>
+            Task<StatisticsCollection> loadTask;
+            if (Settings.Default.UseRawHotslogsExport)
+            {
+                loadTask = Task.Factory.StartNew(() =>
                 {
                     var baseFilter = new HotslogsFilter
                     {
@@ -260,9 +264,15 @@ namespace HotsDraftHelper
                         Mode = (GameMode)Enum.Parse(typeof(GameMode), Settings.Default.AdjustmentsGameMode),
                         LookbackDays = Settings.Default.AdjustmentsNumberOfDays > 0 ? Settings.Default.AdjustmentsNumberOfDays : (int?)null
                     };
-                    return HeroesStatistics.FromHotslogsExport(Settings.Default.HotsLogsExportPath, baseFilter, adjFilter);
-                })
-                .ContinueWith(r =>
+                    return StatisticsCollection.FromHotslogsExport(Settings.Default.HotsLogsExportPath, baseFilter, adjFilter);
+                });
+            }
+            else
+            {
+                loadTask = Task.Factory.StartNew(() => StatisticsCollection.DeserializeFromFile(Settings.Default.DraftDataPath));
+            }
+
+            loadTask.ContinueWith(r =>
                 {
                     Ready = true;
                     if (r.IsFaulted)
@@ -270,7 +280,7 @@ namespace HotsDraftHelper
                     else if (r.IsCompleted)
                     {
                         LoadError = null;
-                        _heroesStatistics = r.Result;
+                        _stats = r.Result;
                         ReInit();
                     }
                 }, TaskScheduler.FromCurrentSynchronizationContext());
@@ -283,15 +293,15 @@ namespace HotsDraftHelper
             PickedAllies.Clear();
             PickedEnemies.Clear();
             Bans.Clear();
-            if (_heroesStatistics == null)
+            if (_stats == null)
             {
                 AvailableMaps = Array.Empty<Map>();
                 SelectedMap = null;
                 TheoWinRate = null;
                 return;
             }
-            AvailableMaps = new [] { new Map(-1, "") }.Concat(_heroesStatistics.Maps.Values).ToList();
-            foreach (var hero in _heroesStatistics.Heroes.Values)
+            AvailableMaps = new [] { new Map(-1, "") }.Concat(_stats.Maps.Values).ToList();
+            foreach (var hero in _stats.Heroes.Values)
             {
                 AvailableAllies.Add(new HeroSelectionViewModel(hero));
                 AvailableEnemies.Add(new HeroSelectionViewModel(hero));
@@ -301,94 +311,86 @@ namespace HotsDraftHelper
 
         private void Refresh()
         {
-            double winRate = 0.5;
+            double totalAdj = 0;
             foreach (var ally in PickedAllies)
             {
-                double adjWinRate = winRate;
-                adjWinRate = Utils.ApplyAdjustment(adjWinRate, Utils.CalcAdjustment(0.5, _heroesStatistics.BaseStatistics.WinRates[ally.Hero].Percentage));
+                double adj = 0;
+                var breakdown = new List<(string source, double amount)>();
+                adj = AddAdjustment(adj, _stats.GetHeroAdjustment(ally.Hero), "Base", breakdown);
                 if (SelectedMap != null && SelectedMap.Id >= 0)
-                    adjWinRate = Utils.ApplyAdjustment(adjWinRate, _heroesStatistics.MapAdjustments.Adjustments[(ally.Hero, SelectedMap)]);
+                    adj = AddAdjustment(adj, _stats.MapAdjustments[(ally.Hero, SelectedMap)], "Map", breakdown);
                 foreach (var otherAlly in PickedAllies)
                 {
                     if (otherAlly == ally)
                         continue;
-                    adjWinRate = Utils.ApplyAdjustment(
-                        adjWinRate,
-                        _heroesStatistics.HeroAdjustments.GetSynergyAdjustment(ally.Hero, otherAlly.Hero) / 2);
+                    adj = AddAdjustment(adj, _stats.GetSynergyAdjustment(ally.Hero, otherAlly.Hero), $"w/{otherAlly.HeroName}", breakdown, 0.5);
                 }
                 foreach (var enemy in PickedEnemies)
-                {
-                    adjWinRate = Utils.ApplyAdjustment(
-                        adjWinRate,
-                        _heroesStatistics.HeroAdjustments.GetCounterAdjustment(ally.Hero, enemy.Hero) / 2);
-                }
-                ally.Diff = Utils.CalcAdjustment(winRate, adjWinRate) * 50;
-                winRate = adjWinRate;
+                    adj = AddAdjustment(adj, _stats.GetCounterAdjustment(ally.Hero, enemy.Hero), $"vs. {enemy.HeroName}", breakdown, 0.5);
+
+                ally.Diff = Utils.ApplyAdjustment(0.5, adj) - 0.5;
+                ally.SetBreakdown(breakdown);
+                totalAdj += adj;
             }
             foreach (var enemy in PickedEnemies)
             {
-                double adjWinRate = winRate;
-                adjWinRate = Utils.ApplyAdjustment(adjWinRate, -Utils.CalcAdjustment(0.5, _heroesStatistics.BaseStatistics.WinRates[enemy.Hero].Percentage));
+                double adj = 0;
+                var breakdown = new List<(string source, double amount)>();
+                adj = AddAdjustment(adj, _stats.GetHeroAdjustment(enemy.Hero), "Base", breakdown, -1);
                 if (SelectedMap != null && SelectedMap.Id >= 0)
-                    adjWinRate = Utils.ApplyAdjustment(adjWinRate, -_heroesStatistics.MapAdjustments.Adjustments[(enemy.Hero, SelectedMap)]);
+                    adj = AddAdjustment(adj, _stats.MapAdjustments[(enemy.Hero, SelectedMap)], "Map", breakdown, -1);
                 foreach (var otherEnemy in PickedEnemies)
                 {
                     if (otherEnemy == enemy)
                         continue;
-                    adjWinRate = Utils.ApplyAdjustment(
-                        adjWinRate,
-                        -_heroesStatistics.HeroAdjustments.GetSynergyAdjustment(enemy.Hero, otherEnemy.Hero) / 2);
+                    adj = AddAdjustment(adj, _stats.GetSynergyAdjustment(enemy.Hero, otherEnemy.Hero), $"w/{otherEnemy.HeroName}", breakdown, -0.5);
                 }
                 foreach (var ally in PickedAllies)
-                {
-                    adjWinRate = Utils.ApplyAdjustment(
-                        adjWinRate,
-                        -_heroesStatistics.HeroAdjustments.GetCounterAdjustment(enemy.Hero, ally.Hero) / 2);
-                }
-                enemy.Diff = Utils.CalcAdjustment(winRate, adjWinRate) * 50;
-                winRate = adjWinRate;
+                    adj = AddAdjustment(adj, _stats.GetCounterAdjustment(enemy.Hero, ally.Hero), $"vs. {ally.HeroName}", breakdown, - 0.5);
+                enemy.Diff = Utils.ApplyAdjustment(0.5, adj) - 0.5;
+                enemy.SetBreakdown(breakdown);
+                totalAdj += adj;
             }
-            TheoWinRate = winRate;
+            TheoWinRate = Utils.ApplyAdjustment(0.5, totalAdj);
             foreach (var ally in AvailableAllies)
             {
-                double adjWinRate = winRate;
-                adjWinRate = Utils.ApplyAdjustment(adjWinRate, Utils.CalcAdjustment(0.5, _heroesStatistics.BaseStatistics.WinRates[ally.Hero].Percentage));
+                double adj = 0;
+                var breakdown = new List<(string source, double amount)>();
+                adj = AddAdjustment(adj, _stats.GetHeroAdjustment(ally.Hero), "Base", breakdown);
                 if (SelectedMap != null && SelectedMap.Id >= 0)
-                    adjWinRate = Utils.ApplyAdjustment(adjWinRate, _heroesStatistics.MapAdjustments.Adjustments[(ally.Hero, SelectedMap)]);
+                    adj = AddAdjustment(adj, _stats.MapAdjustments[(ally.Hero, SelectedMap)], "Map", breakdown);
                 foreach (var otherAlly in PickedAllies)
-                {
-                    adjWinRate = Utils.ApplyAdjustment(
-                        adjWinRate,
-                        _heroesStatistics.HeroAdjustments.GetSynergyAdjustment(ally.Hero, otherAlly.Hero));
-                }
+                    adj = AddAdjustment(adj, _stats.GetSynergyAdjustment(ally.Hero, otherAlly.Hero), $"w/{otherAlly.HeroName}", breakdown);
                 foreach (var enemy in PickedEnemies)
-                {
-                    adjWinRate = Utils.ApplyAdjustment(
-                        adjWinRate,
-                        _heroesStatistics.HeroAdjustments.GetCounterAdjustment(ally.Hero, enemy.Hero));
-                }
-                ally.Diff = adjWinRate - winRate;
+                    adj = AddAdjustment(adj, _stats.GetCounterAdjustment(ally.Hero, enemy.Hero), $"vs. {enemy.HeroName}", breakdown);
+                ally.Diff = Utils.ApplyAdjustment(TheoWinRate.Value, adj) - TheoWinRate.Value;
+                ally.SetBreakdown(breakdown);
             }
             foreach (var enemy in AvailableEnemies)
             {
-                double adjWinRate = winRate;
-                adjWinRate = Utils.ApplyAdjustment(adjWinRate, -Utils.CalcAdjustment(0.5, _heroesStatistics.BaseStatistics.WinRates[enemy.Hero].Percentage));
+                double adj = 0;
+                var breakdown = new List<(string source, double amount)>();
+                adj = AddAdjustment(adj, _stats.GetHeroAdjustment(enemy.Hero), "Base", breakdown, -1);
                 if (SelectedMap != null && SelectedMap.Id >= 0)
-                    adjWinRate = Utils.ApplyAdjustment(adjWinRate, -_heroesStatistics.MapAdjustments.Adjustments[(enemy.Hero, SelectedMap)]);
+                    adj = AddAdjustment(adj, _stats.MapAdjustments[(enemy.Hero, SelectedMap)], "Map", breakdown, -1);
                 foreach (var otherEnemy in PickedEnemies)
-                {
-                    adjWinRate = Utils.ApplyAdjustment(
-                        adjWinRate,
-                        -_heroesStatistics.HeroAdjustments.GetSynergyAdjustment(enemy.Hero, otherEnemy.Hero));
-                }
+                    adj = AddAdjustment(adj, _stats.GetSynergyAdjustment(enemy.Hero, otherEnemy.Hero), $"w/{otherEnemy.HeroName}", breakdown, -1);
                 foreach (var ally in PickedAllies)
-                {
-                    adjWinRate = Utils.ApplyAdjustment(
-                        adjWinRate,
-                        -_heroesStatistics.HeroAdjustments.GetCounterAdjustment(enemy.Hero, ally.Hero));
-                }
-                enemy.Diff = adjWinRate - winRate;
+                    adj = AddAdjustment(adj, _stats.GetCounterAdjustment(enemy.Hero, ally.Hero), $"vs. {ally.HeroName}", breakdown, -1);
+                enemy.Diff = Utils.ApplyAdjustment(TheoWinRate.Value, adj) - TheoWinRate.Value;
+                enemy.SetBreakdown(breakdown);
             }
+        }
+        
+        private double AddAdjustment(double current, Statistic adjustment, string context, List<(string context, double adj)> breakdown, double scaleFactor = 1)
+        {
+            if (adjustment.SampleSize >= Settings.Default.MinSampleSize)
+            {
+                var adj = adjustment.Value * scaleFactor;
+                breakdown.Add((context, adj));
+                return current + adj;
+            }
+            return current;
         }
     }
 }

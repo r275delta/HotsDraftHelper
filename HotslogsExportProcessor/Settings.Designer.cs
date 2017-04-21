@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace HotsDraftHelper {
+namespace HotslogsExportProcessor {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
@@ -20,18 +20,6 @@ namespace HotsDraftHelper {
         public static Settings Default {
             get {
                 return defaultInstance;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
-        public int MinSampleSize {
-            get {
-                return ((int)(this["MinSampleSize"]));
-            }
-            set {
-                this["MinSampleSize"] = value;
             }
         }
         
@@ -98,24 +86,12 @@ namespace HotsDraftHelper {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("%USERPROFILE%\\Documents\\HotsDraftData.json")]
-        public string DraftDataPath {
+        public string ExtractDestinationPath {
             get {
-                return ((string)(this["DraftDataPath"]));
+                return ((string)(this["ExtractDestinationPath"]));
             }
             set {
-                this["DraftDataPath"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool UseRawHotslogsExport {
-            get {
-                return ((bool)(this["UseRawHotslogsExport"]));
-            }
-            set {
-                this["UseRawHotslogsExport"] = value;
+                this["ExtractDestinationPath"] = value;
             }
         }
     }

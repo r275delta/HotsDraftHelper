@@ -1,6 +1,6 @@
-﻿namespace HotsDraftHelper.Data
+﻿namespace HotsDraftLib
 {
-    internal sealed class HotslogsFilter
+    public sealed class HotslogsFilter
     {
         public double? LookbackDays { get; set; }
         public GameMode Mode { get; set; } = GameMode.QuickMatch;

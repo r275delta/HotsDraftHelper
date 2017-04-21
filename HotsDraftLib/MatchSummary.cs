@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HotsDraftHelper.Data
+namespace HotsDraftLib
 {
     internal sealed class MatchSummary
     {

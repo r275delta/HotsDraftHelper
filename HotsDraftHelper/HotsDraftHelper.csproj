@@ -38,6 +38,9 @@
     <Reference Include="MathNet.Numerics, Version=3.18.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Numerics.3.18.0\lib\net40\MathNet.Numerics.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PowerCollections">
       <HintPath>libs\PowerCollections.dll</HintPath>
     </Reference>
@@ -64,18 +67,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Data\BaseStatistics.cs" />
-    <Compile Include="Data\GameMode.cs" />
-    <Compile Include="Data\Hero.cs" />
-    <Compile Include="Data\HeroAdjustments.cs" />
-    <Compile Include="Data\HotslogsFilter.cs" />
-    <Compile Include="Data\Map.cs" />
-    <Compile Include="Data\MapAdjustments.cs" />
-    <Compile Include="Data\MatchDetail.cs" />
-    <Compile Include="Data\MatchSummary.cs" />
-    <Compile Include="Data\MatchSummaryCollection.cs" />
-    <Compile Include="Data\WinRate.cs" />
-    <Compile Include="Data\HeroesStatistics.cs" />
     <Compile Include="HeroSelectionViewModel.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="Settings.Designer.cs">
@@ -83,7 +74,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Utils.cs" />
     <Compile Include="ViewModelBase.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -129,6 +119,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HotsDraftLib\HotsDraftLib.csproj">
+      <Project>{3808e9d8-227c-4724-9dff-1afff53eb02a}</Project>
+      <Name>HotsDraftLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

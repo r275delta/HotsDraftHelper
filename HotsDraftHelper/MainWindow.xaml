@@ -77,7 +77,13 @@
                 <DataGrid Grid.Row="2" Grid.Column="0" ItemsSource="{Binding Source={StaticResource AvailableAlliesSource}}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickAvailableAlly">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
-                        <DataGridTextColumn Header="Diff" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50" SortDirection="Descending" />
+                        <DataGridTextColumn Header="Diff" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50" SortDirection="Descending">
+                            <DataGridTextColumn.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="ToolTip" Value="{Binding Breakdown}" />
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                     <DataGrid.ContextMenu>
                         <ContextMenu DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
@@ -90,7 +96,13 @@
                 <DataGrid Grid.Row="2" Grid.Column="1" ItemsSource="{Binding PickedAllies}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickSelectedAlly">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
-                        <DataGridTextColumn Header="Adj" Binding="{Binding Diff, StringFormat={}{0:F3}}" IsReadOnly="True" Width="50" />
+                        <DataGridTextColumn Header="Adj" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50">
+                            <DataGridTextColumn.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="ToolTip" Value="{Binding Breakdown}" />
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
                 <DataGrid Grid.Row="2" Grid.Column="2" ItemsSource="{Binding Bans}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column">
@@ -108,13 +120,25 @@
                 <DataGrid Grid.Row="2" Grid.Column="3" ItemsSource="{Binding PickedEnemies}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickSelectedEnemy">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
-                        <DataGridTextColumn Header="Adj" Binding="{Binding Diff, StringFormat={}{0:F3}}" IsReadOnly="True" Width="50" />
+                        <DataGridTextColumn Header="Adj" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50">
+                            <DataGridTextColumn.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="ToolTip" Value="{Binding Breakdown}" />
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
                 <DataGrid Grid.Row="2" Grid.Column="4" ItemsSource="{Binding Source={StaticResource AvailableEnemiesSource}}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickAvailableEnemy">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
-                        <DataGridTextColumn Header="Diff" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50" SortDirection="Ascending" />
+                        <DataGridTextColumn Header="Diff" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50" SortDirection="Ascending">
+                            <DataGridTextColumn.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="ToolTip" Value="{Binding Breakdown}" />
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                     <DataGrid.ContextMenu>
                         <ContextMenu DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">

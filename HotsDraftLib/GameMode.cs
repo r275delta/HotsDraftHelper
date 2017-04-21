@@ -1,6 +1,6 @@
-﻿namespace HotsDraftHelper.Data
+﻿namespace HotsDraftLib
 {
-    internal enum GameMode
+    public enum GameMode
     {
         QuickMatch = 3,
         HeroLeague = 4,
