@@ -28,11 +28,26 @@
                 <scm:SortDescription PropertyName="Diff" Direction="Ascending" />
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
+        <local:SubGroupToColorConverter x:Key="SubGroupToColorConverter" 
+                                        Tank="#CCCC99"
+                                        Bruiser="#E3A23B"
+                                        Healer="#3BE33B"
+                                        Support="#60CDCD"
+                                        Ambusher="#E3E33B"
+                                        BurstDamage="#E33B3B"
+                                        SustainedDamage="#E33B8E"
+                                        Siege="#A660E8"
+                                        Utility="#DDDDDD" />
+        <Style x:Key="SelectionHeroCellStyle" TargetType="DataGridCell">
+            <Setter Property="Background" Value="{Binding Hero.SubGroup, Converter={StaticResource SubGroupToColorConverter}}" />
+            <Setter Property="Foreground" Value="Black" />
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
@@ -76,7 +91,7 @@
                 <TextBlock Grid.Row="1" Grid.Column="4" HorizontalAlignment="Center">Available</TextBlock>
                 <DataGrid Grid.Row="2" Grid.Column="0" ItemsSource="{Binding Source={StaticResource AvailableAlliesSource}}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickAvailableAlly">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*" CellStyle="{StaticResource SelectionHeroCellStyle}" />
                         <DataGridTextColumn Header="Diff" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50" SortDirection="Descending">
                             <DataGridTextColumn.CellStyle>
                                 <Style TargetType="DataGridCell">
@@ -95,7 +110,7 @@
                 </DataGrid>
                 <DataGrid Grid.Row="2" Grid.Column="1" ItemsSource="{Binding PickedAllies}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickSelectedAlly">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"  CellStyle="{StaticResource SelectionHeroCellStyle}" />
                         <DataGridTextColumn Header="Adj" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50">
                             <DataGridTextColumn.CellStyle>
                                 <Style TargetType="DataGridCell">
@@ -119,7 +134,7 @@
                 </DataGrid>
                 <DataGrid Grid.Row="2" Grid.Column="3" ItemsSource="{Binding PickedEnemies}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickSelectedEnemy">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*" CellStyle="{StaticResource SelectionHeroCellStyle}"/>
                         <DataGridTextColumn Header="Adj" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50">
                             <DataGridTextColumn.CellStyle>
                                 <Style TargetType="DataGridCell">
@@ -131,7 +146,7 @@
                 </DataGrid>
                 <DataGrid Grid.Row="2" Grid.Column="4" ItemsSource="{Binding Source={StaticResource AvailableEnemiesSource}}" AutoGenerateColumns="False" ColumnWidth="*" GridLinesVisibility="None" CanUserResizeRows="False" HeadersVisibility="Column" MouseDoubleClick="OnDoubleClickAvailableEnemy">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="Hero" Binding="{Binding HeroName}" IsReadOnly="True" Width="*"  CellStyle="{StaticResource SelectionHeroCellStyle}"/>
                         <DataGridTextColumn Header="Diff" Binding="{Binding Diff, StringFormat={}{0:P}}" IsReadOnly="True" Width="50" SortDirection="Ascending">
                             <DataGridTextColumn.CellStyle>
                                 <Style TargetType="DataGridCell">
@@ -150,5 +165,22 @@
                 </DataGrid>
             </Grid>
         </Grid>
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type TextBlock}">
+                    <Setter Property="Margin" Value="2,0,2,0"></Setter>
+                    <Setter Property="Background" Value="{Binding Text, RelativeSource={RelativeSource Self}, Converter={StaticResource SubGroupToColorConverter}}"></Setter>
+                </Style>
+            </StackPanel.Resources>
+            <TextBlock>Tank</TextBlock>
+            <TextBlock>Bruiser</TextBlock>
+            <TextBlock>Healer</TextBlock>
+            <TextBlock>Support</TextBlock>
+            <TextBlock>Ambusher</TextBlock>
+            <TextBlock>Burst Damage</TextBlock>
+            <TextBlock>Sustained Damage</TextBlock>
+            <TextBlock>Siege</TextBlock>
+            <TextBlock>Utility</TextBlock>
+        </StackPanel>
     </Grid>
 </Window>
